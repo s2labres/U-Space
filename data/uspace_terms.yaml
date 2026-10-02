@@ -1,0 +1,51 @@
+ambiguity:
+  anchors: [ambiguity, ambiguous, baffling, bizarre, confusing, impossible, incoherent, incomprehensible,
+    perplexity, puzzling, unclear, unexpected, unpredictable]
+  poles: [achievable, annually, appropriately, blocking, bounded, caused, causing, clarifies, clarifying,
+    clarity, classifies, clear, commanded, completly, comprises, concise, condemned, consists, continues,
+    decree, deem, definetly, definite, delivers, demonstrable, differentiates, doable, doubtless, enforced,
+    especially, evidently, exactness, exemplifies, explains, explicitly, exposing, extensively, extremely,
+    extremly, failed, full, fundamentally, guided, hugely, illustrates, implicitly, inescapable, inevitable,
+    insight, instructing, intrinsically, invariable, irrefutable, irrefutably, literally, mandated, mandating,
+    must, often, precision, predictable, quoting, realise, realising, robbed, seeing, signaling, specifying,
+    straightforward, submitted, surely, tell, telling, thoroughly, transparent, transpired, tremendously,
+    unchanging, underline, understood, welldefined, wholly]
+incompleteness:
+  anchors: [incomplete, inconceivable, mysteries, mysterious, mystery, unanticipated, uncharted, undetermined,
+    undiscovered, unexplained, unidentified, unknown, unrecognized, unusual]
+  poles: [accountable, accounted, adequately, apologise, attained, attended, certification, certified,
+    complete, completed, completeness, consequences, corrected, covered, dead, declare, determined, discarded,
+    distributed, done, enable, enlisted, essential, everyday, excluded, exempted, exists, expected, finalized,
+    finalizing, finished, fulfill, fulfilled, greatest, guaranteeing, happen, highlighted, hiring, identified,
+    improvements, indicate, indicates, informing, inspecting, institutionalized, integral, interested,
+    isolated, killed, known, knows, maintained, nailed, necessary, never, persistently, presence, progressed,
+    proving, qualifies, ready, recalled, recognize, referencing, requirements, requires, responded, solved,
+    solves, specifics, superseded, unavailable, unconditional, undeniable, undisputed, unmistakably, unquestionable,
+    unquestionably, unquestioning, untouchable, verification, verifies, verify, verifying]
+conflicting_evidence:
+  anchors: [conflicting, consensus, contentious, contradictory, contrary, controversial, dispute, fallacy,
+    incompatible, inconclusive, incongruity, inconsistent, irreconcilable, misconception, misleading,
+    paradox, paradoxical]
+  poles: [absolute, absolutely, absolutist, accuracy, adamantly, affirmative, aforementioned, agreed,
+    agreement, agrees, analyses, articulating, asserted, attacks, captures, centred, citing, claim, concluded,
+    concludes, conclusion, conclusions, conclusive, condemns, confirmed, consensus, consent, convictions,
+    corresponds, declared, declares, deduced, definitive, equates, eradicated, evidenced, evidences, exact,
+    exactly, exclude, exclusively, exhibiting, factual, factually, 'false', imminent, inappropriate, indisputably,
+    indubitably, insists, kills, mainly, manifesto, measures, noon, precisely, predominately, prefers,
+    prohibits, proof, published, quantified, referenced, refuse, reliably, report, researched, resolved,
+    resolves, ruling, scored, seconded, severing, strongest, substantiated, totality, truth, unambiguously,
+    unanimous, undoubtedly, verified, witnessed, works, yep]
+general_uncertainty:
+  anchors: [debatable, deceptive, doubtful, dubious, flaw, implausible, improbable, misbelief, skeptic,
+    surprise, surprising, suspect, suspicion, uncertain, uncertainty, unconvincing, unreliable]
+  poles: [acknowledged, admitting, affirm, affirming, afforded, approve, approved, approves, assisted,
+    assuredly, assures, belief, believing, carefully, ceases, certain, certainty, certify, cognizant,
+    commended, commit, commitment, committing, compelled, confident, confirmations, confirming, confirms,
+    considerably, convinces, credible, credibly, decided, decidedly, decisive, decisively, deliberately,
+    denies, dignified, doubtlessly, emphasized, emphatic, ensured, establishing, favours, finalize, firm,
+    forced, founded, granted, guarantee, guaranteed, guarantees, highly, honestly, ideal, improves, insist,
+    landed, notably, noticeable, originally, positive, positives, positivity, predicated, predominantly,
+    preferable, proactively, proclaiming, promised, promises, proves, purchases, reaffirm, reaffirmed,
+    reciprocated, recommended, resolute, restored, satisfies, secured, solidified, solution, stopped,
+    succeeded, supportive, testified, truly, trust, trusted, unequivocally, validated, validates, validating,
+    vow, vowed, waived]

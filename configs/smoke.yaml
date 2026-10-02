@@ -1,0 +1,27 @@
+data_dir: data/smoke
+
+items:
+  n: 10
+  seed: 42
+
+datasets:
+  triviaqa:
+    repo: mandarjoshi/trivia_qa
+    revision: 0f7faf33a3908546c6fd5b73a660e0f8ff173c2f
+
+uspace_terms: data/uspace_terms.yaml
+
+generation:
+  seeds: [42]
+  prompt_headroom: 4096
+
+models:
+  qwen4b:
+    hf: Qwen/Qwen3.5-4B
+    revision: 851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a
+    budget: 16384
+    sampling: {temperature: 1.0, top_p: 0.95, top_k: 20}
+    chat_kwargs: {}
+    think_end: "</think>"
+    readout_block: 20
+    lens: {repo: neuronpedia/jacobian-lens, file: qwen3.5-4b/jlens/Salesforce-wikitext/Qwen3.5-4B_jacobian_lens_n1000.pt, revision: 0731326edff4ae730ffc5356fe1a4728c748b3a6}

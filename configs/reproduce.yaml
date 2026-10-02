@@ -1,0 +1,59 @@
+data_dir: data
+
+items:
+  n: 1000
+  seed: 42
+
+datasets:
+  mmlupro:
+    repo: TIGER-Lab/MMLU-Pro
+    revision: b189ec765aa7ed75c8acfea42df31fdae71f97be
+    ids_sha256: 89730b61045905a0dcf1b38ab8a5f0928e3ffee61bc84e06a68d67b6aec8c0b1
+  omnimath:
+    repo: KbsdJames/omni-math-rule
+    revision: 4793415ef37d31c9cdb4e5b82dbe172f76f8cf08
+    min_difficulty: 4.25
+    ids_sha256: ec66b11d7603cda7b786cf389d2b9ab8ae230eebd51ee57f22a7703dbffd37d9
+  supergpqa:
+    repo: m-a-p/SuperGPQA
+    revision: 4430d4458112c7d4497fdcf94d7cc223313d6acf
+    ids_sha256: ee01eb7b339b82ea5a3f2dbebda4d3d2198b71f8710cad621f1b571588c4ac7e
+  triviaqa:
+    repo: mandarjoshi/trivia_qa
+    revision: 0f7faf33a3908546c6fd5b73a660e0f8ff173c2f
+    ids_sha256: 7f613832db55fb5b8fd07e139382df8be9709f254b1a4da0e5da22573948df0f
+
+uspace_terms: data/uspace_terms.yaml
+
+generation:
+  seeds: [41, 42, 43]
+  prompt_headroom: 4096
+
+models:
+  gemma:
+    hf: google/gemma-4-31B-it
+    revision: 842da3794eaa0b77d5f08bae87a17459d91ff475
+    budget: 65536
+    sampling: {temperature: 1.0, top_p: 0.95, top_k: 64}
+    chat_kwargs: {enable_thinking: true}
+    think_end: "<channel|>"
+    readout_block: 39
+    lens: {repo: neuronpedia/jacobian-lens, file: gemma-4-31b/jlens/Salesforce-wikitext/gemma-4-31B_jacobian_lens.pt, revision: 0731326edff4ae730ffc5356fe1a4728c748b3a6}
+  qwen:
+    hf: Qwen/Qwen3.5-27B
+    revision: fc05daec18b0a78c049392ed2e771dde82bdf654
+    budget: 65536
+    sampling: {temperature: 1.0, top_p: 0.95, top_k: 20}
+    chat_kwargs: {}
+    think_end: "</think>"
+    readout_block: 42
+    lens: {repo: neuronpedia/jacobian-lens, file: qwen3.5-27b/jlens/Salesforce-wikitext/Qwen3.5-27B_jacobian_lens.pt, revision: 0731326edff4ae730ffc5356fe1a4728c748b3a6}
+  magistral:
+    hf: mistralai/Magistral-Small-2507
+    revision: b3583a426ca23186681c4297926dfe9219be6161
+    budget: 32768
+    sampling: {temperature: 0.7, top_p: 0.95}
+    chat_kwargs: {}
+    think_end: "[/THINK]"
+    readout_block: 26
+    lens: {path: data/lens/magistral_block26.npy}
