@@ -419,27 +419,22 @@ function placeStations(){
 }
 function showStations(p){ STATION_RANGES.forEach(([id,p0,p1])=>{ const el=document.getElementById(id); const inside=p>=p0 && p<p1; const edge=Math.min(p0===0?1:p-p0, p1-p); el.style.opacity=inside?clamp(edge/.025,0,1):0; el.style.pointerEvents=inside?"none":"none"; el.querySelectorAll("a").forEach(a=>a.style.pointerEvents=inside?"auto":"none"); }); }
 const upV=new THREE.Vector3(0,1,0);
-const camTarget=new THREE.Vector3(), camPos=new THREE.Vector3(3.6,1.9,4.2), lookPos=new THREE.Vector3(-1.2,0.1,0.2);
-const viewDir=lookPos.clone().sub(camPos).normalize(); const MAX_TURN=28;
+const camTarget=new THREE.Vector3(), camPos=new THREE.Vector3(3.6,1.9,4.2), lookPos=new THREE.Vector3(-0.6,0.1,0.1);
+const viewDir=lookPos.clone().sub(camPos).normalize(); const MAX_TURN=40;
 let mouse={x:0,y:0};
 window.addEventListener("mousemove",e=>{ mouse.x=(e.clientX/window.innerWidth-.5); mouse.y=(e.clientY/window.innerHeight-.5); });
 function flight(p){
-  // returns desired camera position, look-at, and the reveal fraction for journey progress p in [0,1]
-  const C=PREP.hamlet.curve;
-  const R=PREP.hamlet.rail;
-  if(p<FLY0){ // approach: dolly in from outside while the pyramid stays in view
-    const t=ease(p/FLY0); const start=new THREE.Vector3(3.6,1.9,4.2); const tan=R.getTangentAt(0); const side=new THREE.Vector3().crossVectors(tan,upV).normalize();
-    const near=R.getPointAt(0).clone().add(upV.clone().multiplyScalar(1.0)).add(side.multiplyScalar(.9)).sub(tan.clone().multiplyScalar(.9));
-    return {pos:start.lerp(near,t), look:new THREE.Vector3(-1.2,0.1,0.2).lerp(R.getPointAt(.12),t), reveal:0.0};
-  }
-  if(p<FLY1){ const u=(p-FLY0)/(FLY1-FLY0); const ub=clamp(u-.1,0,1), uf=clamp(u+.14,0,1);
-    const pos=R.getPointAt(ub).clone(); const tan=R.getTangentAt(ub); const side=new THREE.Vector3().crossVectors(tan,upV).normalize();
-    pos.add(upV.clone().multiplyScalar(1.0)).add(side.multiplyScalar(.9)).sub(tan.clone().multiplyScalar(.8));
-    return {pos, look:R.getPointAt(uf), reveal:u};
-  }
-  const t=ease((p-FLY1)/(1-FLY1)); const last=R.getPointAt(1).clone(); const tan=R.getTangentAt(.93); const side=new THREE.Vector3().crossVectors(tan,upV).normalize();
-  const near=last.clone().add(upV.clone().multiplyScalar(1.0)).add(side.multiplyScalar(.9)).sub(tan.clone().multiplyScalar(.8)); const far=new THREE.Vector3(3.4,2.2,4.0);
-  return {pos:near.lerp(far,t), look:last.clone().lerp(new THREE.Vector3(0,0,0),t), reveal:1};
+  // a chase camera: it always looks at the word being written (the head of the path) from a
+  // slowly turning offset, so the next point is in view at every moment of the scroll
+  const C=PREP.hamlet.curve, R=PREP.hamlet.rail;
+  const offAt=u=>{ const a=-0.6+u*1.4; const o=new THREE.Vector3(Math.sin(a)*1.25, 0.95, Math.cos(a)*1.25); return o; };
+  const headAt=u=>R.getPointAt(u).clone().lerp(C.getPointAt(u),.5);   // between the smooth rail and the real point
+  if(p<FLY0){ const t=ease(p/FLY0); const start=new THREE.Vector3(3.6,1.9,4.2); const h=headAt(0);
+    return {pos:start.lerp(h.clone().add(offAt(0)),t), look:new THREE.Vector3(-0.6,0.1,0.1).lerp(h,t), reveal:0.0}; }
+  if(p<FLY1){ const u=(p-FLY0)/(FLY1-FLY0); const h=headAt(u); const lead=C.getPointAt(clamp(u+.04,0,1)).sub(C.getPointAt(u)).multiplyScalar(.5);
+    return {pos:h.clone().add(offAt(u)), look:h.clone().add(lead), reveal:u}; }
+  const t=ease((p-FLY1)/(1-FLY1)); const h=headAt(1); const far=new THREE.Vector3(3.4,2.2,4.0);
+  return {pos:h.clone().add(offAt(1)).lerp(far,t), look:h.clone().lerp(new THREE.Vector3(0,0,0),t), reveal:1};
 }
 let explorerFocus=null;       // set when the reader picks a word below; the camera then frames that word
 function frameWord(k){ explorerFocus=k; }
