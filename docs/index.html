@@ -31,13 +31,13 @@
          opacity:1; transition:opacity .5s;}
 
   /* top bar */
-  .bar{position:fixed; top:0; left:0; right:0; z-index:30; padding-top:env(safe-area-inset-top,0px); background:linear-gradient(to bottom, #07090ccc, #07090c00); }
+  .bar{position:fixed; top:0; left:0; right:0; z-index:30; padding-top:env(safe-area-inset-top,0px); background:#07090ce0; backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border-bottom:1px solid var(--line);}
   .bar .wrap{display:flex; align-items:center; gap:18px; height:60px;}
   .brand{font-family:var(--display); font-weight:600; letter-spacing:.12em; font-size:.95rem; color:var(--ink); border:0; white-space:nowrap;}
-  .bar nav{display:flex; gap:18px; margin-left:auto; flex-wrap:wrap;}
+  .bar nav{display:flex; align-items:center; gap:18px; margin-left:auto; flex-wrap:wrap;}
   .bar nav a{font-size:.84rem; color:var(--muted); border:0;}
   .bar nav a:hover{color:var(--ink)}
-  .bar nav a.cta{color:var(--bg); background:var(--ink); padding:7px 12px; border-radius:6px; font-weight:600;}
+  .bar nav a.cta{color:var(--bg); background:var(--ink); padding:7px 12px; border-radius:6px; font-weight:600; margin-left:6px; line-height:1;}
   .progress{position:fixed; left:0; top:0; height:2px; width:0; background:var(--ink); z-index:31; opacity:.7;}
 
   /* the journey: stations placed along the flight */
