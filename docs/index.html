@@ -350,7 +350,7 @@ function prepare(run){
   const size=ac.map(a=>0.013+0.024*((a-amin)/Math.max(1e-6,amax-amin)));
   const curve=new THREE.CatmullRomCurve3(gen.map(i=>new THREE.Vector3(...pts[i])), false, "centripetal", .5);
   // the camera rides a heavily smoothed copy of the path, so it glides instead of following every wiggle
-  const shc=smooth(run.shares,31); const cpts=gen.map(i=>{ const q=[0,0,0]; for(let c=0;c<4;c++) for(let a=0;a<3;a++) q[a]+=shc[i][c]*V[c][a]*SPREAD; return new THREE.Vector3(...q); });
+  const shc=smooth(run.shares,45); const cpts=gen.map(i=>{ const q=[0,0,0]; for(let c=0;c<4;c++) for(let a=0;a<3;a++) q[a]+=shc[i][c]*V[c][a]*SPREAD; return new THREE.Vector3(...q); });
   const rail=new THREE.CatmullRomCurve3(cpts, false, "centripetal", .5);
   return {gen,pts,win,size,curve,rail};
 }
@@ -360,7 +360,7 @@ const PREP={}; for(const k in RUNS) PREP[k]=prepare(RUNS[k]);
 const canvas=document.getElementById("gl");
 const renderer=new THREE.WebGLRenderer({canvas, antialias:true, alpha:true}); renderer.setPixelRatio(Math.min(2,window.devicePixelRatio||1));
 const scene=new THREE.Scene(); scene.fog=new THREE.FogExp2(0x07090c, .16);
-const camera=new THREE.PerspectiveCamera(46, 2, .02, 60);
+const camera=new THREE.PerspectiveCamera(42, 2, .02, 60);
 const mapCam=new THREE.PerspectiveCamera(30, 1, .1, 60); mapCam.position.set(4.2,3.0,5.0); mapCam.lookAt(0,0,0);
 function glowTex(){ const c=document.createElement("canvas"); c.width=c.height=128; const g=c.getContext("2d"); const r=g.createRadialGradient(64,64,0,64,64,64); r.addColorStop(0,"rgba(255,255,255,1)"); r.addColorStop(.3,"rgba(255,255,255,.5)"); r.addColorStop(1,"rgba(255,255,255,0)"); g.fillStyle=r; g.fillRect(0,0,128,128); return new THREE.CanvasTexture(c); }
 function textSprite(text,color){ const c=document.createElement("canvas"); const g=c.getContext("2d"); const f="600 54px \"IBM Plex Sans\", sans-serif"; g.font=f; const w=Math.ceil(g.measureText(text).width)+40; c.width=w; c.height=96; g.font=f; g.textBaseline="middle"; g.shadowColor="rgba(0,0,0,.9)"; g.shadowBlur=18; g.fillStyle=color; g.fillText(text,20,48);
@@ -419,24 +419,26 @@ function placeStations(){
 }
 function showStations(p){ STATION_RANGES.forEach(([id,p0,p1])=>{ const el=document.getElementById(id); const inside=p>=p0 && p<p1; const edge=Math.min(p0===0?1:p-p0, p1-p); el.style.opacity=inside?clamp(edge/.025,0,1):0; el.style.pointerEvents=inside?"none":"none"; el.querySelectorAll("a").forEach(a=>a.style.pointerEvents=inside?"auto":"none"); }); }
 const upV=new THREE.Vector3(0,1,0);
-const camTarget=new THREE.Vector3(), camPos=new THREE.Vector3(3.4,1.7,4.0), lookPos=new THREE.Vector3(0,0,0);
+const camTarget=new THREE.Vector3(), camPos=new THREE.Vector3(3.6,1.9,4.2), lookPos=new THREE.Vector3(-1.2,0.1,0.2);
+const viewDir=lookPos.clone().sub(camPos).normalize(); const MAX_TURN=28;
 let mouse={x:0,y:0};
 window.addEventListener("mousemove",e=>{ mouse.x=(e.clientX/window.innerWidth-.5); mouse.y=(e.clientY/window.innerHeight-.5); });
 function flight(p){
   // returns desired camera position, look-at, and the reveal fraction for journey progress p in [0,1]
   const C=PREP.hamlet.curve;
-  if(p<FLY0){ // approach from outside toward the entrance of the path
-    const t=ease(p/FLY0); const start=new THREE.Vector3(3.4,1.7,4.0); const entry=C.getPointAt(0).clone(); const tan=C.getTangentAt(0);
-    const near=entry.clone().sub(tan.clone().multiplyScalar(1.5)).add(new THREE.Vector3(0,.7,0));
-    return {pos:start.lerp(near,t), look:new THREE.Vector3(-1.4,0.15,0.2).lerp(C.getPointAt(.06),t), reveal:0.0};
+  const R=PREP.hamlet.rail;
+  if(p<FLY0){ // approach: dolly in from outside while the pyramid stays in view
+    const t=ease(p/FLY0); const start=new THREE.Vector3(3.6,1.9,4.2); const tan=R.getTangentAt(0); const side=new THREE.Vector3().crossVectors(tan,upV).normalize();
+    const near=R.getPointAt(0).clone().add(upV.clone().multiplyScalar(1.0)).add(side.multiplyScalar(.9)).sub(tan.clone().multiplyScalar(.9));
+    return {pos:start.lerp(near,t), look:new THREE.Vector3(-1.2,0.1,0.2).lerp(R.getPointAt(.12),t), reveal:0.0};
   }
-  if(p<FLY1){ const u=(p-FLY0)/(FLY1-FLY0); const R=PREP.hamlet.rail; const ub=clamp(u-.12,0,1), uf=clamp(u+.1,0,1);
+  if(p<FLY1){ const u=(p-FLY0)/(FLY1-FLY0); const ub=clamp(u-.1,0,1), uf=clamp(u+.14,0,1);
     const pos=R.getPointAt(ub).clone(); const tan=R.getTangentAt(ub); const side=new THREE.Vector3().crossVectors(tan,upV).normalize();
-    pos.add(upV.clone().multiplyScalar(.8)).add(side.multiplyScalar(.7)).sub(tan.clone().multiplyScalar(.5));
+    pos.add(upV.clone().multiplyScalar(1.0)).add(side.multiplyScalar(.9)).sub(tan.clone().multiplyScalar(.8));
     return {pos, look:R.getPointAt(uf), reveal:u};
   }
-  const t=ease((p-FLY1)/(1-FLY1)); const last=C.getPointAt(1).clone(); const tan=C.getTangentAt(.93);
-  const near=last.clone().sub(tan.multiplyScalar(1.5)).add(new THREE.Vector3(0,.8,0)); const far=new THREE.Vector3(3.4,2.2,4.0);
+  const t=ease((p-FLY1)/(1-FLY1)); const last=R.getPointAt(1).clone(); const tan=R.getTangentAt(.93); const side=new THREE.Vector3().crossVectors(tan,upV).normalize();
+  const near=last.clone().add(upV.clone().multiplyScalar(1.0)).add(side.multiplyScalar(.9)).sub(tan.clone().multiplyScalar(.8)); const far=new THREE.Vector3(3.4,2.2,4.0);
   return {pos:near.lerp(far,t), look:last.clone().lerp(new THREE.Vector3(0,0,0),t), reveal:1};
 }
 let explorerFocus=null;       // set when the reader picks a word below; the camera then frames that word
@@ -444,18 +446,23 @@ function frameWord(k){ explorerFocus=k; }
 const toklab=document.getElementById("toklab"), scrim=document.getElementById("scrim"), cue=document.getElementById("cue"), prog=document.getElementById("prog"), mapbox=document.getElementById("mapbox");
 let lastT=performance.now();
 function tick(now){ const dt=Math.min(.1,(now-lastT)/1000); lastT=now;
-  if(window.__freeze){ camera.position.copy(camPos); camera.lookAt(lookPos); setReveal(revealU); renderer.setScissorTest(false); renderer.setViewport(0,0,window.innerWidth,window.innerHeight); renderer.render(scene,camera);
+  if(window.__freeze){ camera.position.copy(camPos); camera.lookAt(lookPos); viewDir.copy(lookPos).sub(camPos).normalize(); setReveal(revealU); renderer.setScissorTest(false); renderer.setViewport(0,0,window.innerWidth,window.innerHeight); renderer.render(scene,camera);
     const S=Math.min(220,Math.floor(window.innerWidth*.28)); const mx=window.innerWidth-S-18, my=mapbox.offsetTop; renderer.setViewport(mx, window.innerHeight-my-S, S, S); renderer.setScissor(mx, window.innerHeight-my-S, S, S); renderer.setScissorTest(true); scene.fog.density=.02; renderer.autoClear=false; renderer.render(scene,mapCam); renderer.autoClear=true; scene.fog.density=.16; renderer.setScissorTest(false); mapbox.style.opacity=1; requestAnimationFrame(tick); return; }
   const jh=document.querySelector(".journey").offsetHeight - window.innerHeight; const y=window.scrollY||document.documentElement.scrollTop;
   const p=clamp(y/Math.max(1,jh),0,1); prog.style.width=(100*Math.min(1,y/(document.body.scrollHeight-window.innerHeight)))+"%";
   let f;
   if(y>jh+40 && explorerFocus!==null){ // reading part: frame the chosen word of the chosen run
     const u=explorerFocus/(P.gen.length-1); const C=P.curve; const pt=C.getPointAt(u); const tan=C.getTangentAt(u); const side=new THREE.Vector3().crossVectors(tan,upV).normalize();
-    f={pos:pt.clone().add(side.multiplyScalar(1.1)).add(new THREE.Vector3(0,.7,0)), look:pt, reveal:u};
+    f={pos:pt.clone().add(side.multiplyScalar(1.5)).add(new THREE.Vector3(0,1.0,0)), look:pt, reveal:u};
   } else if(runKey!=="hamlet"){ runKey="hamlet"; buildPath(); f=flight(p); } else f=flight(p);
-  const k=reduce?1:1-Math.pow(.02,dt);
-  camPos.lerp(f.pos,k); lookPos.lerp(f.look,k);
-  camera.position.copy(camPos); const lk=lookPos.clone(); lk.x+=mouse.x*.25; lk.y-=mouse.y*.18; camera.lookAt(lk);
+  const k=reduce?1:1-Math.pow(.06,dt);
+  camPos.lerp(f.pos,k);
+  // the view direction turns at most MAX_TURN degrees per second, whatever the scroll does
+  const want=f.look.clone().sub(camPos).normalize(); const have=viewDir.clone();
+  const ang=Math.acos(clamp(have.dot(want),-1,1)); const maxA=reduce?Math.PI:(MAX_TURN*Math.PI/180)*dt;
+  if(ang>1e-4){ const q=new THREE.Quaternion().setFromUnitVectors(have,want); if(ang>maxA){ q.slerp(new THREE.Quaternion(),1-maxA/ang); } viewDir.applyQuaternion(q).normalize(); }
+  lookPos.copy(camPos).add(viewDir);
+  camera.position.copy(camPos); const lk=lookPos.clone(); lk.x+=mouse.x*.12; lk.y-=mouse.y*.08; camera.lookAt(lk);
   const ki=setReveal(reduce?f.reveal:lerp(revealU,f.reveal,k));
   // the word label at the head
   const sv=head.position.clone().project(camera); const vis=sv.z<1 && (p>FLY0*.8) && (y<jh+40 || explorerFocus!==null);
