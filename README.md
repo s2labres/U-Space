@@ -1,8 +1,12 @@
-# U-Lens
+# U-Space
 
-Code for U-Lens and the single-pass baselines in the uncertainty-estimation results (Tables 1
-and 2) on Gemma-4-31B-it, Qwen3.5-27B and Magistral-Small-2507, over MMLU-Pro, Omni-MATH,
-SuperGPQA and TriviaQA, seeds 41, 42 and 43.
+Official code for **[U-Space: Uncovering When and Why Uncertainty Arises in Language Models](https://arxiv.org/abs/2610.09087)**.
+
+U-Space tracks ambiguity, incomplete information, conflicting evidence, and general uncertainty through language-model generation. U-Lens combines this verbalizable signal with predictive entropy into a label-free, single-pass uncertainty score.
+
+**[Paper](https://arxiv.org/abs/2610.09087) · [PDF](https://arxiv.org/pdf/2610.09087) · [Reproduction guide](#setup)**
+
+This repository reproduces U-Lens and the single-pass baselines in Tables 1 and 2 on Gemma-4-31B-it, Qwen3.5-27B, and Magistral-Small-2507 across MMLU-Pro, Omni-MATH, SuperGPQA, and TriviaQA with seeds 41, 42, and 43.
 
 ## Setup
 
@@ -62,3 +66,15 @@ documented in `src/methods/base.py`.
 | Mean NLL | `mean_nll` | forward |
 | Self-Certainty | `self_certainty` | forward |
 | DeepConf | `deepconf` | forward |
+
+## Citation
+
+```bibtex
+@article{braun2026uspace,
+  title   = {U-Space: Uncovering When and Why Uncertainty Arises in Language Models},
+  author  = {Braun, Tobias and Loose, Nils and Herzog, Alexander and Ceccatelli, Virginia and Rohrbach, Marcus and Eisenbarth, Thomas and Cavallaro, Lorenzo},
+  journal = {arXiv preprint arXiv:2610.09087},
+  year    = {2026},
+  url     = {https://arxiv.org/abs/2610.09087}
+}
+```
