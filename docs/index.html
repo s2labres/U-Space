@@ -1,16 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>U-Space | Interpretable Uncertainty in Language Models</title>
-<meta name="description" content="Explore when and why uncertainty arises during language-model reasoning with U-Space and U-Lens.">
-<meta name="theme-color" content="#07090c">
-<link rel="canonical" href="https://s2labres.github.io/U-Space/">
-<meta property="og:type" content="website">
-<meta property="og:title" content="U-Space: When and Why Uncertainty Arises">
-<meta property="og:description" content="Follow ambiguity, missing information, conflicting evidence, and general uncertainty token by token inside language models.">
-<meta property="og:url" content="https://s2labres.github.io/U-Space/">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="U-Space: When and Why Uncertainty Arises">
-<meta name="twitter:description" content="An interactive view of interpretable uncertainty signals in language-model reasoning.">
-</head><body style="margin:0">
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body style="margin:0"><title>U-Space</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
   /* A flight through the simplex. One fixed WebGL scene behind everything; scrolling moves the
@@ -364,7 +352,11 @@ function prepare(run){
   // the camera rides a heavily smoothed copy of the path, so it glides instead of following every wiggle
   const shc=smooth(run.shares,45); const cpts=gen.map(i=>{ const q=[0,0,0]; for(let c=0;c<4;c++) for(let a=0;a<3;a++) q[a]+=shc[i][c]*V[c][a]*SPREAD; return new THREE.Vector3(...q); });
   const rail=new THREE.CatmullRomCurve3(cpts, false, "centripetal", .5);
-  return {gen,pts,win,size,curve,rail};
+  // where the view should look beyond the path: the corner the smoothed shares favour, as a
+  // continuous blend (sharpened), so the view drifts toward a new corner instead of jumping
+  const shk=smooth(run.shares,25); const focus=gen.map(i=>{ const w=shk[i].map(v=>Math.pow(v,4)); const z=w.reduce((a,b)=>a+b,0); const q=[0,0,0]; for(let c=0;c<4;c++) for(let a=0;a<3;a++) q[a]+=w[c]/z*V[c][a]; return new THREE.Vector3(...q); });
+  const focusCurve=new THREE.CatmullRomCurve3(focus, false, "centripetal", .5);
+  return {gen,pts,win,size,curve,rail,focusCurve};
 }
 const PREP={}; for(const k in RUNS) PREP[k]=prepare(RUNS[k]);
 
@@ -436,21 +428,22 @@ const viewDir=lookPos.clone().sub(camPos).normalize(); const MAX_TURN=40;
 let mouse={x:0,y:0};
 window.addEventListener("mousemove",e=>{ mouse.x=(e.clientX/window.innerWidth-.5); mouse.y=(e.clientY/window.innerHeight-.5); });
 function flight(p){
-  // a chase camera: it looks at the word being written from the far side of that word's own
-  // corner, so the corner the word leans toward sits in the background behind it; when the
-  // colour changes, the view swings (smoothly, in tick) to put the new corner behind the path
-  const C=PREP.hamlet.curve, R=PREP.hamlet.rail, Pr=PREP.hamlet, n=Pr.gen.length;
+  // a chase camera: it looks past the word being written toward the corner the words are
+  // drifting to, from the far side, so that corner (and its label) is in the picture while the
+  // path evolves toward it. The corner of interest is a smooth blend, so the view never jumps.
+  const C=PREP.hamlet.curve, R=PREP.hamlet.rail, F=PREP.hamlet.focusCurve;
   const headAt=u=>R.getPointAt(u).clone().lerp(C.getPointAt(u),.5);
-  const cornerOf=u=>{ const k=clamp(Math.round(u*(n-1)),0,n-1); return new THREE.Vector3(...V[Pr.win[Pr.gen[k]]]); };
-  const offAt=u=>{ const h=headAt(u); const away=h.clone().sub(cornerOf(u)); away.y=0; if(away.length()<1e-3) away.set(1,0,0); away.normalize();
-    const side=new THREE.Vector3().crossVectors(upV,away).normalize();   // a little to the side, so the path reads in depth
-    return away.multiplyScalar(1.35).add(side.multiplyScalar(.45)).add(upV.clone().multiplyScalar(.85)); };
-  if(p<FLY0){ const t=ease(p/FLY0); const start=new THREE.Vector3(3.6,1.9,4.2); const h=headAt(0);
-    return {pos:start.lerp(h.clone().add(offAt(0)),t), look:new THREE.Vector3(-0.6,0.1,0.1).lerp(h,t), reveal:0.0}; }
-  if(p<FLY1){ const u=(p-FLY0)/(FLY1-FLY0); const h=headAt(u); const lead=C.getPointAt(clamp(u+.04,0,1)).sub(C.getPointAt(u)).multiplyScalar(.5);
-    return {pos:h.clone().add(offAt(u)), look:h.clone().add(lead), reveal:u}; }
-  const t=ease((p-FLY1)/(1-FLY1)); const h=headAt(1); const far=new THREE.Vector3(3.4,2.2,4.0);
-  return {pos:h.clone().add(offAt(1)).lerp(far,t), look:h.clone().lerp(new THREE.Vector3(0,0,0),t), reveal:1};
+  const viewAt=u=>{ const h=headAt(u); const corner=F.getPointAt(u); const toC=corner.clone().sub(h);
+    const away=toC.clone().multiplyScalar(-1); away.y*=.6; if(away.length()<1e-3) away.set(1,0,0); away.normalize();
+    const side=new THREE.Vector3().crossVectors(upV,away).normalize();
+    const pos=h.clone().add(away.multiplyScalar(1.5)).add(side.multiplyScalar(.5)).add(upV.clone().multiplyScalar(.45));
+    const look=h.clone().add(toC.multiplyScalar(.46));            // the head a little off-centre, the corner and its label in frame
+    return {pos,look}; };
+  if(p<FLY0){ const t=ease(p/FLY0); const start=new THREE.Vector3(3.6,1.9,4.2); const v=viewAt(0);
+    return {pos:start.lerp(v.pos,t), look:new THREE.Vector3(-0.6,0.1,0.1).lerp(v.look,t), reveal:0.0}; }
+  if(p<FLY1){ const u=(p-FLY0)/(FLY1-FLY0); const v=viewAt(u); return {pos:v.pos, look:v.look, reveal:u}; }
+  const t=ease((p-FLY1)/(1-FLY1)); const v=viewAt(1); const far=new THREE.Vector3(3.4,2.2,4.0);
+  return {pos:v.pos.clone().lerp(far,t), look:v.look.clone().lerp(new THREE.Vector3(0,0,0),t), reveal:1};
 }
 let explorerFocus=null;       // set when the reader picks a word below; the camera then frames that word
 function frameWord(k){ explorerFocus=k; }
