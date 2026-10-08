@@ -25,6 +25,10 @@
   /* fixed scene */
   #gl{position:fixed; inset:0; z-index:0; width:100%; height:100%; display:block;}
   #labels{position:fixed; inset:0; z-index:1; pointer-events:none;}
+  .callout{position:absolute; width:0; height:0; overflow:visible; opacity:0; transition:opacity .3s;}
+  .callout svg{position:absolute; left:0; top:-64px; width:64px; height:64px; overflow:visible;}
+  .callout span{position:absolute; left:40px; top:-78px; white-space:nowrap; font-family:var(--mono); font-size:.95rem; padding:5px 10px; border-radius:6px;
+          background:#07090cd9; border:1px solid var(--line); color:var(--ink);}
   .toklab{position:absolute; transform:translate(-50%,-160%); white-space:nowrap; font-family:var(--mono); font-size:.95rem; padding:5px 10px; border-radius:6px;
           background:#07090cd9; border:1px solid var(--line); color:var(--ink); opacity:0; transition:opacity .25s;}
   .scrim{position:fixed; inset:0; z-index:1; pointer-events:none; background:linear-gradient(100deg, rgba(7,9,12,.78) 0%, rgba(7,9,12,.45) 38%, rgba(7,9,12,0) 62%);
@@ -140,7 +144,10 @@
 
 <canvas id="gl"></canvas>
 <div class="scrim" id="scrim"></div>
-<div id="labels"><div class="toklab" id="toklab"></div></div>
+<div id="labels"><div class="toklab" id="toklab"></div>
+  <div class="callout" id="callout" aria-hidden="true">
+    <svg viewBox="0 0 64 64" fill="none" stroke-width="1.2" stroke-linecap="round"><path d="M8 56 L40 22"/></svg><span>first token</span>
+  </div></div>
 <div class="progress" id="prog"></div>
 <div class="bar"><div class="wrap">
   <a class="brand" href="#top">U-SPACE</a>
@@ -381,7 +388,7 @@ scene.add(new THREE.Mesh(fg,new THREE.MeshBasicMaterial({color:0x9aa5b1, transpa
 V.forEach((v,i)=>{ const col=new THREE.Color(CAT[cats[i]]);
   const s=new THREE.Mesh(new THREE.SphereGeometry(.09,28,28), new THREE.MeshBasicMaterial({color:col})); s.position.set(...v); scene.add(s);
   const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:GLOW,color:col,transparent:true,opacity:.6,blending:THREE.AdditiveBlending,depthWrite:false})); sp.scale.set(1.1,1.1,1); sp.position.set(...v); scene.add(sp);
-  const lab=textSprite(CATL[cats[i]],CAT[cats[i]]); lab.position.set(v[0]*1.22,v[1]*1.22+.2,v[2]*1.22); scene.add(lab); });
+  const lab=textSprite(CATL[cats[i]],CAT[cats[i]]); lab.position.set(v[0]*1.22,v[1]*1.22+(v[1]<0?-.3:.2),v[2]*1.22); scene.add(lab); });   // top corners: label above; bottom corners: label below, clear of the sphere
 // dust
 (function(){ const n=reduce?0:900; const g=new THREE.BufferGeometry(); const p=[]; for(let i=0;i<n;i++){ p.push((Math.random()-.5)*14,(Math.random()-.5)*14,(Math.random()-.5)*14); } g.setAttribute("position",new THREE.Float32BufferAttribute(p,3));
   scene.add(new THREE.Points(g,new THREE.PointsMaterial({color:0x8a94a0,size:.02,transparent:true,opacity:.5,depthWrite:false}))); })();
@@ -450,7 +457,7 @@ function flight(p){
 }
 let explorerFocus=null;       // set when the reader picks a word below; the camera then frames that word
 function frameWord(k){ explorerFocus=k; }
-const toklab=document.getElementById("toklab"), scrim=document.getElementById("scrim"), cue=document.getElementById("cue"), prog=document.getElementById("prog"), mapbox=document.getElementById("mapbox");
+const toklab=document.getElementById("toklab"), callout=document.getElementById("callout"), scrim=document.getElementById("scrim"), cue=document.getElementById("cue"), prog=document.getElementById("prog"), mapbox=document.getElementById("mapbox");
 let lastT=performance.now();
 function tick(now){ const dt=Math.min(.1,(now-lastT)/1000); lastT=now;
   if(window.__freeze){ camera.position.copy(camPos); camera.lookAt(lookPos); viewDir.copy(lookPos).sub(camPos).normalize(); setReveal(revealU); renderer.setScissorTest(false); renderer.setViewport(0,0,window.innerWidth,window.innerHeight); renderer.render(scene,camera);
@@ -476,6 +483,10 @@ function tick(now){ const dt=Math.min(.1,(now-lastT)/1000); lastT=now;
   const sv=head.position.clone().project(camera); const vis=sv.z<1 && (p>FLY0*.8) && (y<jh+40 || explorerFocus!==null);
   toklab.style.opacity=vis?1:0; toklab.style.left=((sv.x*.5+.5)*window.innerWidth)+"px"; toklab.style.top=((-sv.y*.5+.5)*window.innerHeight)+"px";
   toklab.textContent=RUNS[runKey].tokens[P.gen[ki]].trim(); toklab.style.borderColor=CAT[cats[P.win[P.gen[ki]]]];
+  // "first token" callout: points at the first ball while the path has not started growing
+  if(dots.length){ const c0=dots[0].getWorldPosition(new THREE.Vector3()).project(camera); const cvis=c0.z<1 && y<80 && explorerFocus===null; const c0col=CAT[cats[P.win[P.gen[0]]]];
+    callout.style.opacity=cvis?1:0; callout.style.left=((c0.x*.5+.5)*window.innerWidth)+"px"; callout.style.top=((-c0.y*.5+.5)*window.innerHeight)+"px";
+    callout.firstElementChild.style.stroke=c0col; callout.lastElementChild.style.borderColor=c0col; }
   scrim.style.opacity = y<jh ? 1 : 0; cue.style.opacity = y<80 ? 1 : 0; showStations(y<jh+40 ? p : 2);
   canvas.style.opacity = y>jh ? (explorerFocus!==null ? .9 : .35) : 1;
   renderer.setScissorTest(false); renderer.setViewport(0,0,window.innerWidth,window.innerHeight); renderer.render(scene,camera);
