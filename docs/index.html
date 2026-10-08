@@ -1,5 +1,5 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body style="margin:0"><title>U-Space</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@500;700;800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
   /* A flight through the simplex. One fixed WebGL scene behind everything; scrolling moves the
      camera along the model's own reasoning path, station by station; the reading part follows on
@@ -9,7 +9,7 @@
     --bg:#07090c; --ground:#0d1116; --panel:#12171d; --line:#232b35; --line-soft:#182029;
     --ink:#e6e9ec; --muted:#9aa5b1; --faint:#5e6873;
     --amb:#44AA99; --inc:#C9A24A; --con:#C96584; --gen:#8E7FBF;
-    --display:"Syne",system-ui,sans-serif; --body:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+    --display:"IBM Plex Sans",system-ui,-apple-system,sans-serif; --body:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
     --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,monospace;
   }
   *{box-sizing:border-box}
@@ -33,7 +33,7 @@
   /* top bar */
   .bar{position:fixed; top:0; left:0; right:0; z-index:30; padding-top:env(safe-area-inset-top,0px); background:linear-gradient(to bottom, #07090ccc, #07090c00); }
   .bar .wrap{display:flex; align-items:center; gap:18px; height:60px;}
-  .brand{font-family:var(--display); font-weight:800; letter-spacing:.06em; font-size:1rem; color:var(--ink); border:0; white-space:nowrap;}
+  .brand{font-family:var(--display); font-weight:600; letter-spacing:.12em; font-size:.95rem; color:var(--ink); border:0; white-space:nowrap;}
   .bar nav{display:flex; gap:18px; margin-left:auto; flex-wrap:wrap;}
   .bar nav a{font-size:.84rem; color:var(--muted); border:0;}
   .bar nav a:hover{color:var(--ink)}
@@ -42,11 +42,11 @@
 
   /* the journey: stations placed along the flight */
   .journey{position:relative; z-index:2; height:900vh;}
-  .station{position:absolute; left:0; right:0; height:120vh; pointer-events:none;}
-  .station .in{position:sticky; top:22vh; max-width:1100px; margin:0 auto; padding-inline:20px;}
+  .station{position:fixed; left:0; right:0; top:0; height:100%; pointer-events:none; opacity:0; transition:opacity .35s; z-index:4;}
+  .station .in{position:absolute; left:0; right:0; top:22vh; max-width:1100px; margin:0 auto; padding-inline:20px;}
   .station .box{max-width:30rem;}
-  .station h1{font-family:var(--display); font-weight:800; font-size:clamp(3rem,8vw,6rem); line-height:.92; margin:0; letter-spacing:-.02em; white-space:nowrap;}
-  .station h2{font-family:var(--display); font-weight:700; font-size:clamp(1.7rem,4vw,2.9rem); line-height:1.05; margin:0 0 12px; letter-spacing:-.01em; text-wrap:balance;}
+  .station h1{font-family:var(--display); font-weight:600; font-size:clamp(3rem,8vw,5.6rem); line-height:.95; margin:0; letter-spacing:-.03em; white-space:nowrap;}
+  .station h2{font-family:var(--display); font-weight:600; font-size:clamp(1.6rem,3.6vw,2.5rem); line-height:1.1; margin:0 0 12px; letter-spacing:-.02em; text-wrap:balance;}
   .station p{margin:10px 0 0; color:var(--muted); font-size:1.05rem; max-width:34ch;}
   .station p b{color:var(--ink); font-weight:500}
   .station .k{font-family:var(--mono); font-size:.72rem; letter-spacing:.12em; text-transform:uppercase; color:var(--faint); margin:0 0 10px;}
@@ -55,9 +55,11 @@
   .btn.primary{background:var(--ink); color:var(--bg); border-color:var(--ink);}
   .btn:hover{border-color:var(--ink)}
   .c-amb{color:var(--amb)} .c-inc{color:var(--inc)} .c-con{color:var(--con)} .c-gen{color:var(--gen)}
-  .corners{display:grid; gap:6px; margin-top:14px; font-family:var(--display); font-weight:700; font-size:1.25rem;}
+  .corners{display:grid; gap:6px; margin-top:14px; font-family:var(--display); font-weight:600; font-size:1.2rem;}
   .corners span{display:flex; align-items:center; gap:10px;}
   .corners i{width:12px; height:12px; border-radius:3px; display:inline-block;}
+  .mapbox{position:fixed; right:18px; top:calc(env(safe-area-inset-top,0px) + 76px); width:min(220px,28vw); aspect-ratio:1; border:1px solid var(--line); border-radius:10px; z-index:3; pointer-events:none; opacity:0; transition:opacity .4s; background:#07090c55;}
+  .mapbox span{position:absolute; left:10px; bottom:8px; font-family:var(--mono); font-size:.64rem; letter-spacing:.12em; text-transform:uppercase; color:var(--faint);}
   .scrollcue{position:fixed; left:50%; bottom:22px; transform:translateX(-50%); z-index:5; font-family:var(--mono); font-size:.7rem; letter-spacing:.14em; text-transform:uppercase; color:var(--faint); transition:opacity .4s; pointer-events:none;}
   .big{font-family:var(--mono); font-size:clamp(2.2rem,6vw,4rem); color:var(--ink); line-height:1; margin:8px 0 4px; font-variant-numeric:tabular-nums;}
 
@@ -66,8 +68,8 @@
   section{padding-block:72px;}
   section + section{border-top:1px solid var(--line-soft);}
   .kicker{font-family:var(--mono); font-size:.72rem; letter-spacing:.12em; text-transform:uppercase; color:var(--faint); margin:0 0 12px;}
-  h2.t{font-family:var(--display); font-weight:700; font-size:clamp(1.6rem,3.2vw,2.3rem); line-height:1.1; margin:0 0 18px; letter-spacing:-.01em; text-wrap:balance;}
-  h3{font-family:var(--display); font-weight:700; font-size:1.05rem; margin:0 0 8px;}
+  h2.t{font-family:var(--display); font-weight:600; font-size:clamp(1.6rem,3.2vw,2.2rem); line-height:1.15; margin:0 0 18px; letter-spacing:-.02em; text-wrap:balance;}
+  h3{font-family:var(--display); font-weight:600; font-size:1.05rem; margin:0 0 8px;}
   p{margin:0 0 14px; max-width:66ch;}
   p.lead{font-size:1.15rem;}
   .muted{color:var(--muted)}
@@ -80,7 +82,7 @@
   .chip.pole{border-style:dashed; opacity:.75}
   .steps{display:grid; gap:16px;}
   .step{display:grid; grid-template-columns:52px 1fr; gap:14px; align-items:start;}
-  .step .n{font-family:var(--display); font-weight:800; font-size:1.6rem; color:var(--faint); line-height:1;}
+  .step .n{font-family:var(--mono); font-weight:500; font-size:1.3rem; color:var(--faint); line-height:1.3;}
   .eq{font-family:var(--mono); font-size:.86rem; color:var(--ink); background:var(--bg); border:1px solid var(--line-soft); border-radius:8px; padding:10px 12px; margin:8px 0 0; overflow-x:auto; white-space:nowrap;}
 
   /* explorer console */
@@ -149,14 +151,15 @@
   </nav>
 </div></div>
 <div class="scrollcue" id="cue">scroll to enter the pyramid</div>
+<div class="mapbox" id="mapbox"><span>where you are</span></div>
 
 <div class="journey" id="top">
-  <div class="station" id="st0" style="top:0">
+  <div class="station" id="st0" style="opacity:1">
     <div class="in"><div class="box">
       <p class="k">a preprint · arXiv 2610.09087</p>
       <h1 id="title">U-Space</h1>
-      <p style="font-size:1.25rem; color:var(--ink); max-width:26ch; margin-top:14px">Not just how unsure a model is, <b>but why.</b></p>
-      <p>Every word a language model writes becomes a point inside a pyramid of four kinds of doubt, read from the model's own internal states. The path you are about to fly through is a real run.</p>
+      <p style="font-size:1.25rem; color:var(--ink); max-width:26ch; margin-top:14px">Not just <b>how unsure</b> a model is, but <b>what kind of uncertainty</b> it has.</p>
+      <p>A language model can be unsure for different reasons. U-Space reads which one it is, straight from the model's internal workings, and does it for every word the model writes. The flight you are about to take follows one real answer.</p>
       <div class="links">
         <a class="btn primary" href="https://arxiv.org/abs/2610.09087" target="_blank" rel="noopener">Read the paper</a>
         <a class="btn" href="https://github.com/s2labres/U-Space" target="_blank" rel="noopener">Code</a>
@@ -167,7 +170,7 @@
     <p class="k">the run</p>
     <h2>A trick question</h2>
     <p><b>Was Hamlet left-handed, and did he love Ophelia?</b></p>
-    <p>Qwen3.5-27B answers in one pass. We read its internal state at every word it writes and place the word inside the pyramid. Keep scrolling to follow it.</p>
+    <p>We put this to an open model (Qwen3.5-27B). For every word of its answer, we look at the model's internal state and place that word inside the pyramid. Keep scrolling to follow the answer from its first word to its last.</p>
   </div></div></div>
   <div class="station" id="st2"><div class="in"><div class="box">
     <p class="k">the four corners</p>
@@ -178,28 +181,28 @@
       <span><i style="background:var(--con)"></i><em class="c-con">conflicting evidence</em></span>
       <span><i style="background:var(--gen)"></i><em class="c-gen">general uncertainty</em></span>
     </div>
-    <p>A word sits near the corner whose kind of doubt its state leans toward. In the middle, no single reason stands out.</p>
+    <p>A word sits near the corner that matches the kind of doubt behind it. A word in the middle means no single reason stands out. The small map in the corner always shows where you are.</p>
   </div></div></div>
   <div class="station" id="st3"><div class="in"><div class="box">
     <p class="k">first half of the answer</p>
     <h2 class="c-inc">Handedness: something is missing</h2>
-    <p>Shakespeare never says. As the model writes that Hamlet's handedness is never specified, the path hugs the <b class="c-inc">missing information</b> corner.</p>
+    <p>Shakespeare never says whether Hamlet was left-handed. While the model writes that part of its answer, the path stays close to the <b class="c-inc">missing information</b> corner: the model is unsure because a fact is simply not there.</p>
   </div></div></div>
   <div class="station" id="st4"><div class="in"><div class="box">
     <p class="k">a single word</p>
     <h2 class="c-amb">"play": more than one reading</h2>
-    <p>For one word the path leans toward <b class="c-amb">ambiguity</b>. The play, or play as in acting? The model's state carries that doubt even though its text does not.</p>
+    <p>At the word <b>play</b> the path leans toward <b class="c-amb">ambiguity</b> for a moment: the play, or playing a role? The model's internal state carries that double meaning even though its written answer does not show it.</p>
   </div></div></div>
   <div class="station" id="st5"><div class="in"><div class="box">
     <p class="k">second half of the answer</p>
     <h2 class="c-con">Ophelia: the evidence disagrees</h2>
-    <p>Did Hamlet love her? The play itself is divided, and the path swings across the pyramid to <b class="c-con">conflicting evidence</b> and stays there to the end.</p>
+    <p>Did Hamlet love Ophelia? The play gives evidence both ways. As the model answers this half, the path swings across the pyramid to <b class="c-con">conflicting evidence</b> and stays there to the end.</p>
   </div></div></div>
   <div class="station" id="st6"><div class="in"><div class="box">
     <p class="k">at the end of the reasoning</p>
     <h2>One number for the whole answer</h2>
     <div class="big" id="finalscore">·</div>
-    <p>U-Lens: how far the state leans into the doubt cone, times the mean entropy of the output. One forward pass. No labels, no training, no extra generations.</p>
+    <p>We call it the U-Lens score: how strongly the model's internal state leaned toward doubt, combined with how spread out its word choices were. It comes from the single pass that produced the answer. No extra runs, no training, no hand-labelled examples.</p>
     <p style="margin-top:18px; color:var(--faint); font-size:.9rem">Keep scrolling for the method, the numbers and a live demo.</p>
   </div></div></div>
 </div>
@@ -207,8 +210,8 @@
 <div class="ground">
 <section id="explore"><div class="wrap">
   <p class="kicker">Explore</p>
-  <h2 class="t">Three real runs, word by word</h2>
-  <p class="lead muted" style="max-width:70ch">Pick a run and a word. The pyramid above jumps to that moment and the readout shows what the model's state says there. The paths are read at lens block 42 of Qwen3.5-27B with the locked basis; nothing is hand-placed.</p>
+  <h2 class="t">Explore the answers yourself</h2>
+  <p class="lead muted" style="max-width:70ch">We asked the model three questions. Pick one, then click any word of its answer: the scene behind this page jumps to that word, and the numbers below show what the model's internal state said at that moment. Nothing here is hand-placed; it is all read from the model.</p>
   <div class="console">
     <div class="row"><div class="seg" id="runpick" role="group" aria-label="example run"></div><div id="prompt" class="muted" style="font-family:var(--mono); font-size:.84rem"></div></div>
     <div class="tokens" id="tokens"></div>
@@ -225,41 +228,44 @@
 <section id="sources"><div class="wrap">
   <p class="kicker">The four corners</p>
   <h2 class="t">Four sources of uncertainty, built from words</h2>
-  <p class="lead muted" style="max-width:70ch">The directions come from vocabulary, not from labelled data: the words a model uses when it is unsure, sorted into four groups, each contrasted with the words it uses when it is certain.</p>
+  <p class="lead muted" style="max-width:70ch">How do we know which corner is which? From words. We collected the words a model uses when it is unsure, sorted them into four groups, and contrasted each group with the words the model uses when it is certain. No examples had to be labelled by hand.</p>
   <div class="grid4" id="catcards"></div>
   <p class="muted" style="margin-top:16px; font-size:.9rem">Solid chips are a few of the doubt anchors; dashed chips are a few of the certainty poles they are contrasted against. The full lists are in the repository under <span style="font-family:var(--mono)">data/uspace_terms.yaml</span>.</p>
 </div></section>
 
 <section id="how"><div class="wrap narrow">
   <p class="kicker">How it works</p>
-  <h2 class="t">From the J-Lens to a trust signal</h2>
+  <h2 class="t">From a model's inner workings to a trust signal</h2>
   <div class="steps">
     <div class="step"><div class="n">1</div><div>
-      <h3>The J-Lens makes an internal state readable</h3>
-      <p class="muted">A transformer's state at any layer is a list of thousands of numbers. The Jacobian lens transports that state forward to the vocabulary, so a middle layer can be asked: which words is this state pushing the model toward? It turns an opaque vector into something a person can read. That is the foundation we build on.</p>
-      <div class="eq">lens<sub>l</sub>(h) = unembed( J<sub>l</sub> · h ),   J<sub>l</sub> = E[ ∂h<sub>final</sub> / ∂h<sub>l</sub> ]</div>
+      <h3>Reading the inside of a model</h3>
+      <p class="muted">While a language model writes, each layer of the network holds a long list of numbers: its internal state. On its own that list is unreadable. A recent tool called the J-Lens translates it: for any layer, it tells you which words that state is pushing the model toward. That makes the inside of a model something a person can read, and it is the foundation we build on.</p>
     </div></div>
     <div class="step"><div class="n">2</div><div>
-      <h3>Anchor words become directions</h3>
-      <p class="muted">Take the unembedding rows of the doubt anchors and the certainty poles, pull them back through the lens into the residual space, contrast each doubt group against its poles, and orthogonalise the four contrasts. The result is a four-dimensional basis inside the model: U-Space. No training, no labels, no correctness data anywhere in the construction.</p>
+      <h3>Turning words of doubt into directions</h3>
+      <p class="muted">Using the same translation in reverse, we take the words of doubt from the four groups and find the directions inside the model that correspond to them, each measured against the words of certainty. Four directions, one per kind of doubt: that is U-Space. Nothing is trained and no correct answers are needed to build it.</p>
     </div></div>
     <div class="step"><div class="n">3</div><div>
-      <h3>U-Lens follows every word</h3>
-      <p class="muted">Project the state at each generated token onto the basis, keep only the direction, rectify it softly. That gives four shares, one per source of doubt: the point moving through the pyramid. The length of the rectified vector is the cone alignment, how strongly the state leans into the doubt cone at all.</p>
-      <div class="eq">A<sub>cone</sub> = ‖ softplus( √d · ẑ ) ‖,   ẑ = U<sup>T</sup> ν(h) / ‖U<sup>T</sup> ν(h)‖</div>
+      <h3>Following every word</h3>
+      <p class="muted">For each word the model writes, we measure how much its internal state leans along each of the four directions. The four amounts place the word inside the pyramid. How strongly it leans overall tells us how much doubt there is at that word. This is the U-Lens: the path you flew through at the top of the page.</p>
     </div></div>
     <div class="step"><div class="n">4</div><div>
-      <h3>One number per answer, and a reason</h3>
-      <p class="muted">At the end of the reasoning, multiply the cone alignment by the mean next-token entropy over the trace: what the state says about doubt, times what the output distribution shows. That product is the U-Lens score, and the shares say which corner the doubt came from. One forward pass.</p>
-      <div class="eq">U-Lens = A<sub>cone</sub>(end of thinking) × mean entropy(trace)</div>
+      <h3>One number per answer, with a reason</h3>
+      <p class="muted">When the model has finished reasoning, we combine how strongly its state leaned toward doubt with how spread out its word choices were. That gives one score for the whole answer: higher means more likely to be wrong. The corner the path favoured says what kind of doubt it was. All of it comes from the single pass that produced the answer.</p>
     </div></div>
   </div>
+  <details style="margin-top:22px; color:var(--muted)"><summary style="cursor:pointer; color:var(--ink)">For the technically minded: the formulas</summary>
+    <div class="eq" style="margin-top:12px">lens<sub>l</sub>(h) = unembed( J<sub>l</sub> · h ),   J<sub>l</sub> = E[ ∂h<sub>final</sub> / ∂h<sub>l</sub> ]   (the Jacobian lens)</div>
+    <div class="eq">A<sub>cone</sub> = ‖ softplus( √d · ẑ ) ‖,   ẑ = U<sup>T</sup> ν(h) / ‖U<sup>T</sup> ν(h)‖   (cone alignment at one token)</div>
+    <div class="eq">U-Lens = A<sub>cone</sub>(end of thinking) × mean next-token entropy over the trace</div>
+    <p style="margin-top:10px; font-size:.9rem">U is the orthogonalised basis of the four doubt-minus-certainty contrasts pulled back through the lens; ν normalises the residual state. Full details and ablations are in the paper.</p>
+  </details>
 </div></section>
 
 <section id="results"><div class="wrap">
   <p class="kicker">Does it work</p>
   <h2 class="t">Better than ten samples, at the cost of one</h2>
-  <p class="lead muted" style="max-width:70ch">How well each method separates wrong answers from right ones, as the area under the ROC curve: 0.5 is a coin flip. Four reasoning benchmarks, three seeds, three open models. Switch to the length-matched view to see what survives when answers of equal length are compared.</p>
+  <p class="lead muted" style="max-width:70ch">We gave three open models thousands of questions from four hard benchmarks and checked each answer. Then we asked every method to spot the wrong ones. The score is the usual one for this: 0.5 means guessing, 1.0 means perfect. "Length-matched" compares only answers of the same length, which removes a trick we explain below.</p>
   <div class="controls">
     <div class="seg" id="modelpick" role="group" aria-label="model"></div>
     <div class="seg" id="scalepick" role="group" aria-label="scale">
@@ -274,7 +280,7 @@
 <section id="defer"><div class="wrap">
   <p class="kicker">In practice</p>
   <h2 class="t">Decide what to trust and what to hand to an expert</h2>
-  <p class="lead muted" style="max-width:70ch">Every answer of a benchmark, sorted by its U-Lens score. Teal answers were right, pink ones wrong. Move the threshold: everything to its right is deferred to extra checks or a human, everything to its left is accepted. These are the paper's own scores.</p>
+  <p class="lead muted" style="max-width:70ch">Here are all the answers from one benchmark, lined up from least to most doubtful according to U-Lens. Teal answers turned out right, pink ones wrong. Drag the slider to choose how many of the most doubtful answers you would send to a human expert, and see what that buys you. These are the real scores from the paper.</p>
   <div class="controls">
     <select id="cell" aria-label="model and benchmark"></select>
     <label style="font-size:.88rem; color:var(--muted)">defer the most doubtful <b id="pct" style="color:var(--ink); font-family:var(--mono)">20%</b></label>
@@ -287,7 +293,7 @@
     <div><b id="s-caught">·</b><span>of the wrong answers deferred</span></div>
     <div><b id="s-n">·</b><span>answers in this cell</span></div>
   </div>
-  <p class="muted" style="margin-top:14px; font-size:.9rem; max-width:70ch">U-Space adds what no scalar score can: for every deferred answer, which corner it leaned toward, so the reviewer knows whether to look for a missing fact, a second reading of the question, or a conflict in the sources.</p>
+  <p class="muted" style="margin-top:14px; font-size:.9rem; max-width:70ch">And U-Space tells the reviewer where to start: for every answer handed over, which corner it leaned toward, so they know whether to look for a missing fact, a second reading of the question, or a conflict between sources.</p>
 </div></section>
 
 <footer><div class="wrap">
@@ -343,7 +349,10 @@ function prepare(run){
   const ac=run.acone, vals=gen.map(i=>ac[i]), amax=Math.max(...vals), amin=Math.min(...vals);
   const size=ac.map(a=>0.013+0.024*((a-amin)/Math.max(1e-6,amax-amin)));
   const curve=new THREE.CatmullRomCurve3(gen.map(i=>new THREE.Vector3(...pts[i])), false, "centripetal", .5);
-  return {gen,pts,win,size,curve};
+  // the camera rides a heavily smoothed copy of the path, so it glides instead of following every wiggle
+  const shc=smooth(run.shares,31); const cpts=gen.map(i=>{ const q=[0,0,0]; for(let c=0;c<4;c++) for(let a=0;a<3;a++) q[a]+=shc[i][c]*V[c][a]*SPREAD; return new THREE.Vector3(...q); });
+  const rail=new THREE.CatmullRomCurve3(cpts, false, "centripetal", .5);
+  return {gen,pts,win,size,curve,rail};
 }
 const PREP={}; for(const k in RUNS) PREP[k]=prepare(RUNS[k]);
 
@@ -351,9 +360,10 @@ const PREP={}; for(const k in RUNS) PREP[k]=prepare(RUNS[k]);
 const canvas=document.getElementById("gl");
 const renderer=new THREE.WebGLRenderer({canvas, antialias:true, alpha:true}); renderer.setPixelRatio(Math.min(2,window.devicePixelRatio||1));
 const scene=new THREE.Scene(); scene.fog=new THREE.FogExp2(0x07090c, .16);
-const camera=new THREE.PerspectiveCamera(52, 2, .02, 60);
+const camera=new THREE.PerspectiveCamera(46, 2, .02, 60);
+const mapCam=new THREE.PerspectiveCamera(30, 1, .1, 60); mapCam.position.set(4.2,3.0,5.0); mapCam.lookAt(0,0,0);
 function glowTex(){ const c=document.createElement("canvas"); c.width=c.height=128; const g=c.getContext("2d"); const r=g.createRadialGradient(64,64,0,64,64,64); r.addColorStop(0,"rgba(255,255,255,1)"); r.addColorStop(.3,"rgba(255,255,255,.5)"); r.addColorStop(1,"rgba(255,255,255,0)"); g.fillStyle=r; g.fillRect(0,0,128,128); return new THREE.CanvasTexture(c); }
-function textSprite(text,color){ const c=document.createElement("canvas"); const g=c.getContext("2d"); const f="700 54px Syne, sans-serif"; g.font=f; const w=Math.ceil(g.measureText(text).width)+40; c.width=w; c.height=96; g.font=f; g.textBaseline="middle"; g.shadowColor="rgba(0,0,0,.9)"; g.shadowBlur=18; g.fillStyle=color; g.fillText(text,20,48);
+function textSprite(text,color){ const c=document.createElement("canvas"); const g=c.getContext("2d"); const f="600 54px \"IBM Plex Sans\", sans-serif"; g.font=f; const w=Math.ceil(g.measureText(text).width)+40; c.width=w; c.height=96; g.font=f; g.textBaseline="middle"; g.shadowColor="rgba(0,0,0,.9)"; g.shadowBlur=18; g.fillStyle=color; g.fillText(text,20,48);
   const t=new THREE.CanvasTexture(c); t.minFilter=THREE.LinearFilter; const s=new THREE.Sprite(new THREE.SpriteMaterial({map:t, transparent:true, depthWrite:false})); s.scale.set(w/96*.3,.3,1); return s; }
 const GLOW=glowTex();
 // wire pyramid
@@ -396,7 +406,7 @@ function setReveal(u){ revealU=clamp(u,0,1); const nTok=P.gen.length; const k=Ma
 
 /* ------------------------------------------------------------------ the flight */
 const journey=document.getElementById("journey")||document.querySelector(".journey");
-const STATIONS=[["st0",0],["st1",.12],["st2",.26],["st3",null],["st4",null],["st5",null],["st6",.9]];
+let STATION_RANGES=[];   // [id, p0, p1]: one panel visible at a time, faded by scroll progress
 const FLY0=.2, FLY1=.86;                 // scroll fraction of the journey spent flying along the path
 function tokenU(pred){ const g=P.gen; for(let k=0;k<g.length;k++){ if(pred(RUNS[runKey].tokens[g[k]])) return k/(g.length-1); } return .5; }
 function placeStations(){
@@ -404,9 +414,10 @@ function placeStations(){
   const find=s=>{ for(let k=0;k<g.length;k++) if(H.tokens[g[k]].toLowerCase().includes(s)) return k/(g.length-1); return .5; };
   const uH=find("handed"), uP=find("play"), uO=find("oph");
   const toP=u=>FLY0+u*(FLY1-FLY0);
-  const tops={st0:0, st1:.11, st2:.24, st3:toP(uH)-.04, st4:toP(uP)-.03, st5:toP(uO)-.02, st6:.9};
-  for(const id in tops){ const el=document.getElementById(id); el.style.top=(tops[id]*100)+"%"; }
+  const starts=[["st0",0],["st1",.09],["st2",.2],["st3",toP(uH)-.05],["st4",toP(uP)-.03],["st5",toP(uO)-.02],["st6",.88]];
+  STATION_RANGES=starts.map(([id,p0],i)=>[id,p0,(i+1<starts.length?starts[i+1][1]:1.01)]);
 }
+function showStations(p){ STATION_RANGES.forEach(([id,p0,p1])=>{ const el=document.getElementById(id); const inside=p>=p0 && p<p1; const edge=Math.min(p0===0?1:p-p0, p1-p); el.style.opacity=inside?clamp(edge/.025,0,1):0; el.style.pointerEvents=inside?"none":"none"; el.querySelectorAll("a").forEach(a=>a.style.pointerEvents=inside?"auto":"none"); }); }
 const upV=new THREE.Vector3(0,1,0);
 const camTarget=new THREE.Vector3(), camPos=new THREE.Vector3(3.4,1.7,4.0), lookPos=new THREE.Vector3(0,0,0);
 let mouse={x:0,y:0};
@@ -416,24 +427,25 @@ function flight(p){
   const C=PREP.hamlet.curve;
   if(p<FLY0){ // approach from outside toward the entrance of the path
     const t=ease(p/FLY0); const start=new THREE.Vector3(3.4,1.7,4.0); const entry=C.getPointAt(0).clone(); const tan=C.getTangentAt(0);
-    const near=entry.clone().sub(tan.clone().multiplyScalar(1.1)).add(new THREE.Vector3(0,.45,0));
+    const near=entry.clone().sub(tan.clone().multiplyScalar(1.5)).add(new THREE.Vector3(0,.7,0));
     return {pos:start.lerp(near,t), look:new THREE.Vector3(-1.4,0.15,0.2).lerp(C.getPointAt(.06),t), reveal:0.0};
   }
-  if(p<FLY1){ const u=(p-FLY0)/(FLY1-FLY0); const ub=clamp(u-.08,0,1), uf=clamp(u+.08,0,1);
-    const pos=C.getPointAt(ub).clone(); const tan=C.getTangentAt(ub); const side=new THREE.Vector3().crossVectors(tan,upV).normalize();
-    pos.add(upV.clone().multiplyScalar(.42)).add(side.multiplyScalar(.34));
-    return {pos, look:C.getPointAt(uf), reveal:u};
+  if(p<FLY1){ const u=(p-FLY0)/(FLY1-FLY0); const R=PREP.hamlet.rail; const ub=clamp(u-.12,0,1), uf=clamp(u+.1,0,1);
+    const pos=R.getPointAt(ub).clone(); const tan=R.getTangentAt(ub); const side=new THREE.Vector3().crossVectors(tan,upV).normalize();
+    pos.add(upV.clone().multiplyScalar(.8)).add(side.multiplyScalar(.7)).sub(tan.clone().multiplyScalar(.5));
+    return {pos, look:R.getPointAt(uf), reveal:u};
   }
   const t=ease((p-FLY1)/(1-FLY1)); const last=C.getPointAt(1).clone(); const tan=C.getTangentAt(.93);
-  const near=last.clone().sub(tan.multiplyScalar(1.1)).add(new THREE.Vector3(0,.45,0)); const far=new THREE.Vector3(3.4,2.2,4.0);
+  const near=last.clone().sub(tan.multiplyScalar(1.5)).add(new THREE.Vector3(0,.8,0)); const far=new THREE.Vector3(3.4,2.2,4.0);
   return {pos:near.lerp(far,t), look:last.clone().lerp(new THREE.Vector3(0,0,0),t), reveal:1};
 }
 let explorerFocus=null;       // set when the reader picks a word below; the camera then frames that word
 function frameWord(k){ explorerFocus=k; }
-const toklab=document.getElementById("toklab"), scrim=document.getElementById("scrim"), cue=document.getElementById("cue"), prog=document.getElementById("prog");
+const toklab=document.getElementById("toklab"), scrim=document.getElementById("scrim"), cue=document.getElementById("cue"), prog=document.getElementById("prog"), mapbox=document.getElementById("mapbox");
 let lastT=performance.now();
 function tick(now){ const dt=Math.min(.1,(now-lastT)/1000); lastT=now;
-  if(window.__freeze){ camera.position.copy(camPos); camera.lookAt(lookPos); setReveal(revealU); renderer.render(scene,camera); requestAnimationFrame(tick); return; }
+  if(window.__freeze){ camera.position.copy(camPos); camera.lookAt(lookPos); setReveal(revealU); renderer.setScissorTest(false); renderer.setViewport(0,0,window.innerWidth,window.innerHeight); renderer.render(scene,camera);
+    const S=Math.min(220,Math.floor(window.innerWidth*.28)); const mx=window.innerWidth-S-18, my=mapbox.offsetTop; renderer.setViewport(mx, window.innerHeight-my-S, S, S); renderer.setScissor(mx, window.innerHeight-my-S, S, S); renderer.setScissorTest(true); scene.fog.density=.02; renderer.autoClear=false; renderer.render(scene,mapCam); renderer.autoClear=true; scene.fog.density=.16; renderer.setScissorTest(false); mapbox.style.opacity=1; requestAnimationFrame(tick); return; }
   const jh=document.querySelector(".journey").offsetHeight - window.innerHeight; const y=window.scrollY||document.documentElement.scrollTop;
   const p=clamp(y/Math.max(1,jh),0,1); prog.style.width=(100*Math.min(1,y/(document.body.scrollHeight-window.innerHeight)))+"%";
   let f;
@@ -441,7 +453,7 @@ function tick(now){ const dt=Math.min(.1,(now-lastT)/1000); lastT=now;
     const u=explorerFocus/(P.gen.length-1); const C=P.curve; const pt=C.getPointAt(u); const tan=C.getTangentAt(u); const side=new THREE.Vector3().crossVectors(tan,upV).normalize();
     f={pos:pt.clone().add(side.multiplyScalar(1.1)).add(new THREE.Vector3(0,.7,0)), look:pt, reveal:u};
   } else if(runKey!=="hamlet"){ runKey="hamlet"; buildPath(); f=flight(p); } else f=flight(p);
-  const k=reduce?1:1-Math.pow(.0015,dt);
+  const k=reduce?1:1-Math.pow(.02,dt);
   camPos.lerp(f.pos,k); lookPos.lerp(f.look,k);
   camera.position.copy(camPos); const lk=lookPos.clone(); lk.x+=mouse.x*.25; lk.y-=mouse.y*.18; camera.lookAt(lk);
   const ki=setReveal(reduce?f.reveal:lerp(revealU,f.reveal,k));
@@ -449,9 +461,15 @@ function tick(now){ const dt=Math.min(.1,(now-lastT)/1000); lastT=now;
   const sv=head.position.clone().project(camera); const vis=sv.z<1 && (p>FLY0*.8) && (y<jh+40 || explorerFocus!==null);
   toklab.style.opacity=vis?1:0; toklab.style.left=((sv.x*.5+.5)*window.innerWidth)+"px"; toklab.style.top=((-sv.y*.5+.5)*window.innerHeight)+"px";
   toklab.textContent=RUNS[runKey].tokens[P.gen[ki]].trim(); toklab.style.borderColor=CAT[cats[P.win[P.gen[ki]]]];
-  scrim.style.opacity = y<jh ? 1 : 0; cue.style.opacity = y<80 ? 1 : 0;
+  scrim.style.opacity = y<jh ? 1 : 0; cue.style.opacity = y<80 ? 1 : 0; showStations(y<jh+40 ? p : 2);
   canvas.style.opacity = y>jh ? (explorerFocus!==null ? .9 : .35) : 1;
-  renderer.render(scene,camera); requestAnimationFrame(tick); }
+  renderer.setScissorTest(false); renderer.setViewport(0,0,window.innerWidth,window.innerHeight); renderer.render(scene,camera);
+  // the map: the whole pyramid from a fixed viewpoint, so you always know where you are
+  const inJourney = y<jh+40 && p>FLY0*.6; mapbox.style.opacity = inJourney ? 1 : 0;
+  if(inJourney){ const S=Math.min(220,Math.floor(window.innerWidth*.28)); const mx=window.innerWidth-S-18, my=18+(mapbox.offsetTop-18);
+    renderer.setViewport(mx, window.innerHeight-my-S, S, S); renderer.setScissor(mx, window.innerHeight-my-S, S, S); renderer.setScissorTest(true);
+    scene.fog.density=.02; renderer.autoClear=false; renderer.render(scene,mapCam); renderer.autoClear=true; scene.fog.density=.16; renderer.setScissorTest(false); }
+  requestAnimationFrame(tick); }
 function resize(){ renderer.setSize(window.innerWidth,window.innerHeight,false); camera.aspect=window.innerWidth/window.innerHeight; camera.updateProjectionMatrix(); placeStations(); }
 window.addEventListener("resize",resize);
 // smooth scroll when the library loaded; the page works without it
