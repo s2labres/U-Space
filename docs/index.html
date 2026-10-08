@@ -433,11 +433,16 @@ function flight(p){
   // path evolves toward it. The corner of interest is a smooth blend, so the view never jumps.
   const C=PREP.hamlet.curve, R=PREP.hamlet.rail, F=PREP.hamlet.focusCurve;
   const headAt=u=>R.getPointAt(u).clone().lerp(C.getPointAt(u),.5);
-  const viewAt=u=>{ const h=headAt(u); const corner=F.getPointAt(u); const toC=corner.clone().sub(h);
+  const viewAt=u=>{
+    // the first stretch of the answer is watched from one steady, zoomed-out spot tilted toward the
+    // incompleteness corner, so the balls are seen growing against it; after that the camera follows
+    const HOLD=.38, s=ease(clamp((u-HOLD)/.2,0,1));            // 0 while holding, 1 once following
+    const uc=lerp(.2, u, s), dist=lerp(2.3, 1.5, s), up=lerp(.6, .45, s);
+    const hc=headAt(uc), h=headAt(u); const corner=F.getPointAt(uc); const toC=corner.clone().sub(hc);
     const away=toC.clone().multiplyScalar(-1); away.y*=.6; if(away.length()<1e-3) away.set(1,0,0); away.normalize();
     const side=new THREE.Vector3().crossVectors(upV,away).normalize();
-    const pos=h.clone().add(away.multiplyScalar(1.5)).add(side.multiplyScalar(.5)).add(upV.clone().multiplyScalar(.45));
-    const look=h.clone().add(toC.multiplyScalar(.46));            // the head a little off-centre, the corner and its label in frame
+    const pos=hc.clone().add(away.multiplyScalar(dist)).add(side.multiplyScalar(.5)).add(upV.clone().multiplyScalar(up));
+    const look=h.clone().lerp(hc,.5).add(corner.clone().sub(h).multiplyScalar(.42));   // between the words and the corner
     return {pos,look}; };
   if(p<FLY0){ const t=ease(p/FLY0); const start=new THREE.Vector3(3.6,1.9,4.2); const v=viewAt(0);
     return {pos:start.lerp(v.pos,t), look:new THREE.Vector3(-0.6,0.1,0.1).lerp(v.look,t), reveal:0.0}; }
