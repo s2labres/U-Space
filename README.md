@@ -67,6 +67,17 @@ documented in `src/methods/base.py`.
 | Self-Certainty | `self_certainty` | forward |
 | DeepConf | `deepconf` | forward |
 
+## License
+
+The code is released under the [BSD 3-Clause License](LICENSE).
+
+Third-party material keeps its own terms:
+
+- `data/lens/magistral_block26.npy` is derived from [Magistral-Small-2507](https://huggingface.co/mistralai/Magistral-Small-2507) (Apache 2.0) and was fitted with Anthropic's [jacobian-lens](https://github.com/anthropics/jacobian-lens) reference implementation (Apache 2.0).
+- The Gemma and Qwen lenses are downloaded at run time from [neuronpedia/jacobian-lens](https://huggingface.co/neuronpedia/jacobian-lens) and are not redistributed here.
+- The anchor terms in `data/uspace_terms.yaml` are drawn from the uncertainty cues of Chen et al. (2018, *Journal of Informetrics*) and the certainty norm of Rocklage et al. (2023, *Journal of Marketing Research*).
+- Models and benchmark datasets are downloaded at run time and are subject to their own licenses.
+
 ## Citation
 
 ```bibtex
